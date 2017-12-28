@@ -12,9 +12,19 @@ namespace Palette
 {
     public static class Palette
     {
+        public static Color ColorThiefToColor(this ColorThiefDotNet.Color c)
+        {
+            return Color.FromArgb(c.A, c.R, c.G, c.B);
+        }
+
+        public static string GetHexString(this Color c)
+        {
+            return $"#{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}";
+        }
+
         private static ColorThiefDotNet.ColorThief colorThief = new ColorThiefDotNet.ColorThief();
 
-        public static async Task<List<Color>> GeneratePalette(Uri path)
+        public static async Task<List<ColorThiefDotNet.QuantizedColor>> GeneratePalette(Uri path)
         {
             if (path == null)
             {
@@ -27,33 +37,35 @@ namespace Palette
                 using (IRandomAccessStream stream = await file.OpenReadAsync())
                 {
                     var decoder = await BitmapDecoder.CreateAsync(stream);
-                    return FromColorThief(await colorThief.GetPalette(decoder, 8, 1));
+                    return await colorThief.GetPalette(decoder, 8, 1, false);
                 }
             }
             else
             {
-                RandomAccessStreamReference random = RandomAccessStreamReference.CreateFromUri(path);
-                using (IRandomAccessStream stream = await random.OpenReadAsync())
+                try
                 {
-                    var decoder = await BitmapDecoder.CreateAsync(stream);
-                    return FromColorThief(await colorThief.GetPalette(decoder, 8, 1));
+                    RandomAccessStreamReference random = RandomAccessStreamReference.CreateFromUri(path);
+                    using (IRandomAccessStream stream = await random.OpenReadAsync())
+                    {
+                        var decoder = await BitmapDecoder.CreateAsync(stream);
+                        return await colorThief.GetPalette(decoder, 8, 1, false);
+                    }
+                }
+                catch (Exception)
+                {
+                    return null;
                 }
             }
         }
 
-
-
-        public static List<Color> FromColorThief(List<ColorThiefDotNet.QuantizedColor> list)
+        public static byte RGBtoL(Color color)
         {
-            return list.Select(x =>
-            {
-                var d = x.Color;
-                var a = d.A;
-                var r = d.R;
-                var g = d.G;
-                var b = d.B;
-                return Color.FromArgb(a, r, g, b);
-            }).ToList();
+            return (byte)(((color.R * 299) + (color.G * 587) + (color.B * 114)) / 1000);
+        }
+
+        public static bool IsDarkColor(Color c)
+        {
+            return (5 * c.G + 2 * c.R + c.B) <= 8 * 128;
         }
     }
 }

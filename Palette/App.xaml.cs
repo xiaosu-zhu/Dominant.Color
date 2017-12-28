@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
@@ -33,6 +35,20 @@ namespace Palette
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+        }
+
+        private async Task Init()
+        {
+            var folder = ApplicationData.Current.LocalCacheFolder;
+            var p = await folder.GetBasicPropertiesAsync();
+            if (p.Size > Math.Pow(2, 20) * 10)
+            {
+                var items = await folder.GetItemsAsync();
+                foreach (var item in items)
+                {
+                    await item.DeleteAsync();
+                }
+            }
         }
 
         /// <summary>

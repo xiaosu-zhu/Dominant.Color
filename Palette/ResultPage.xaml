@@ -1,0 +1,52 @@
+﻿<Page
+    x:Class="Palette.ResultPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mid="Windows.UI.Xaml.Media"
+    xmlns:local="using:Palette"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid AllowDrop="True" DragOver="Grid_DragOver" Drop="Grid_Drop" Background="{x:Bind DominantColor, Mode=OneWay}">
+        <Grid.Resources>
+            <Storyboard x:Name="ToastPop">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Toast" Storyboard.TargetProperty="Opacity">
+                    <EasingDoubleKeyFrame Value="1" KeyTime="0:0:0.32">
+                        <EasingDoubleKeyFrame.EasingFunction>
+                            <QuinticEase/>
+                        </EasingDoubleKeyFrame.EasingFunction>
+                    </EasingDoubleKeyFrame>
+                    <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:1"/>
+                    <LinearDoubleKeyFrame Value="0" KeyTime="0:0:3"/>
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+        </Grid.Resources>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Image HorizontalAlignment="Stretch" VerticalAlignment="Center" Stretch="UniformToFill">
+            <Image.Source>
+                <BitmapImage UriSource="{x:Bind ImageUri, Mode=OneWay}"/>
+            </Image.Source>
+        </Image>
+        <Grid x:Name="Toast" Opacity="0" Background="{ThemeResource SystemControlAltMediumLowAcrylicElementMediumBrush}" CornerRadius="16" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="24">
+            <TextBlock Margin="12,0" x:Name="ToastText" FontFamily="Consolas" Text="Copied!" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{ThemeResource BodyTextBlockStyle}"/>
+        </Grid>
+        <GridView SelectionMode="None" IsItemClickEnabled="True" ItemClick="GridView_ItemClick" Grid.Row="1" Margin="64,0" HorizontalAlignment="Center" VerticalAlignment="Stretch" ItemsSource="{x:Bind PaletteResult}">
+            <GridView.Header>
+                <Button x:Name="Header" Click="Button_Click" Style="{ThemeResource TextBlockButtonStyle}" Margin="12" Content="{x:Bind DominantColorValue,Mode=OneWay, FallbackValue=Loading}" Foreground="{x:Bind TitleForeground,Mode=OneWay}" FontSize="24" FontFamily="Consolas" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </GridView.Header>
+            <GridView.ItemTemplate>
+                <DataTemplate x:DataType="local:ColorBrush">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Background="{x:Bind Background}" MinWidth="96" MinHeight="64"/>
+                        <TextBlock Foreground="{x:Bind Foreground}" Text="{x:Bind Value}" FontFamily="Consolas" Style="{ThemeResource BodyTextBlockStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4"/>
+                    </StackPanel>
+                </DataTemplate>
+            </GridView.ItemTemplate>
+        </GridView>
+    </Grid>
+</Page>
