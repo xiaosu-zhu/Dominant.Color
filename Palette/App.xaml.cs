@@ -35,6 +35,15 @@ namespace Palette
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            UnhandledException += App_UnhandledException;
+        }
+
+        private async void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            e.Handled = true;
+            var folder = ApplicationData.Current.LocalFolder;
+            var file = await folder.CreateFileAsync("log", CreationCollisionOption.OpenIfExists);
+            await FileIO.AppendLinesAsync(file, new string[] { e.Message, e.Exception.StackTrace, (e.Exception.GetType()).Name }, Windows.Storage.Streams.UnicodeEncoding.Utf8);
         }
 
         private async Task Init()
